@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -9,18 +9,33 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ChatPage } from "@/pages/chat";
 import { Scenario } from "@shared/schema";
+import { SavedSession } from "@/lib/session-storage";
 
 function App() {
   const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(null);
   const [sessionKey, setSessionKey] = useState(0);
+  const [loadedSession, setLoadedSession] = useState<SavedSession | null>(null);
+  const [sidebarRefreshTrigger, setSidebarRefreshTrigger] = useState(0);
 
   const handleSelectScenario = (scenario: Scenario | null) => {
     setSelectedScenario(scenario);
+    setLoadedSession(null);
   };
 
   const handleNewSession = () => {
     setSessionKey((prev) => prev + 1);
+    setLoadedSession(null);
   };
+
+  const handleLoadSession = (session: SavedSession) => {
+    setLoadedSession(session);
+    setSelectedScenario(null);
+    setSessionKey((prev) => prev + 1);
+  };
+
+  const handleSessionSaved = useCallback(() => {
+    setSidebarRefreshTrigger((prev) => prev + 1);
+  }, []);
 
   const sidebarStyle = {
     "--sidebar-width": "20rem",
@@ -37,6 +52,8 @@ function App() {
                 selectedScenarioId={selectedScenario?.id || null}
                 onSelectScenario={handleSelectScenario}
                 onNewSession={handleNewSession}
+                onLoadSession={handleLoadSession}
+                refreshTrigger={sidebarRefreshTrigger}
               />
               <div className="flex flex-col flex-1 min-w-0">
                 <header className="flex items-center justify-between gap-4 p-2 border-b bg-background">
@@ -48,6 +65,8 @@ function App() {
                     key={sessionKey}
                     selectedScenario={selectedScenario}
                     onNewSession={handleNewSession}
+                    loadedSession={loadedSession}
+                    onSessionSaved={handleSessionSaved}
                   />
                 </main>
               </div>

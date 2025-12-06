@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Message, Scenario } from "@shared/schema";
 import { ChatMessage } from "@/components/chat-message";
 import { ChatInput } from "@/components/chat-input";
@@ -7,20 +7,25 @@ import { SessionHeader } from "@/components/session-header";
 import { EmptyChat } from "@/components/empty-chat";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { saveSession, SavedSession } from "@/lib/session-storage";
 
 interface ChatPageProps {
   selectedScenario: Scenario | null;
   onNewSession: () => void;
+  loadedSession?: SavedSession | null;
+  onSessionSaved?: () => void;
 }
 
-export function ChatPage({ selectedScenario, onNewSession }: ChatPageProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [phase, setPhase] = useState("initial");
-  const [scenarioName, setScenarioName] = useState<string | null>(null);
+export function ChatPage({ selectedScenario, onNewSession, loadedSession, onSessionSaved }: ChatPageProps) {
+  const [messages, setMessages] = useState<Message[]>(loadedSession?.messages || []);
+  const [sessionId, setSessionId] = useState<string | null>(loadedSession?.id || null);
+  const [phase, setPhase] = useState(loadedSession?.phase || "initial");
+  const [scenarioName, setScenarioName] = useState<string | null>(loadedSession?.scenarioName || null);
+  const [scenarioId, setScenarioId] = useState<string | null>(loadedSession?.scenarioId || null);
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const initialMessageCountRef = useRef<number>(loadedSession?.messages?.length || 0);
   const { toast } = useToast();
 
   const scrollToBottom = useCallback(() => {
@@ -36,8 +41,23 @@ export function ChatPage({ selectedScenario, onNewSession }: ChatPageProps) {
   useEffect(() => {
     if (selectedScenario) {
       setScenarioName(selectedScenario.name);
+      setScenarioId(selectedScenario.id);
     }
   }, [selectedScenario]);
+
+  useEffect(() => {
+    if (sessionId && messages.length > 0 && messages.length > initialMessageCountRef.current) {
+      saveSession({
+        id: sessionId,
+        scenarioId: scenarioId,
+        scenarioName: scenarioName,
+        messages: messages,
+        phase: phase,
+      });
+      initialMessageCountRef.current = messages.length;
+      onSessionSaved?.();
+    }
+  }, [sessionId, messages, scenarioId, scenarioName, phase, onSessionSaved]);
 
   const handleSendMessage = async (content: string) => {
     const userMessage: Message = {
@@ -57,7 +77,7 @@ export function ChatPage({ selectedScenario, onNewSession }: ChatPageProps) {
         body: JSON.stringify({
           message: content,
           sessionId: sessionId || undefined,
-          scenarioId: selectedScenario?.id || undefined,
+          scenarioId: scenarioId || selectedScenario?.id || undefined,
         }),
       });
 
@@ -136,6 +156,7 @@ export function ChatPage({ selectedScenario, onNewSession }: ChatPageProps) {
     setSessionId(null);
     setPhase("initial");
     setScenarioName(selectedScenario?.name || null);
+    setScenarioId(selectedScenario?.id || null);
     onNewSession();
   };
 
