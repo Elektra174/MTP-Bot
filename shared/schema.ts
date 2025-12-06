@@ -13,6 +13,8 @@ export interface Session {
   id: string;
   scenarioId: string | null;
   scenarioName: string | null;
+  scriptId: string | null;
+  scriptName: string | null;
   messages: Message[];
   phase: string;
   createdAt: string;
