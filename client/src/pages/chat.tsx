@@ -38,10 +38,20 @@ export function ChatPage({ selectedScenario, onNewSession, loadedSession, onSess
     scrollToBottom();
   }, [messages, streamingContent, scrollToBottom]);
 
+  const lastScenarioIdRef = useRef<string | null>(null);
+
   useEffect(() => {
     if (selectedScenario) {
       setScenarioName(selectedScenario.name);
       setScenarioId(selectedScenario.id);
+      
+      // Auto-start therapy when a new scenario is selected
+      if (selectedScenario.id !== lastScenarioIdRef.current && messages.length === 0) {
+        lastScenarioIdRef.current = selectedScenario.id;
+        // Send an automatic greeting message for this scenario
+        const greetingMessage = `Здравствуйте, я хотел бы поработать с темой "${selectedScenario.name}". ${selectedScenario.description}.`;
+        handleSendMessage(greetingMessage);
+      }
     }
   }, [selectedScenario]);
 
@@ -157,6 +167,8 @@ export function ChatPage({ selectedScenario, onNewSession, loadedSession, onSess
     setPhase("initial");
     setScenarioName(selectedScenario?.name || null);
     setScenarioId(selectedScenario?.id || null);
+    lastScenarioIdRef.current = null;
+    initialMessageCountRef.current = 0;
     onNewSession();
   };
 
