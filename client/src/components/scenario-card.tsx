@@ -1,7 +1,7 @@
 import { Scenario } from "@shared/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import * as LucideIcons from "lucide-react";
+import { HelpCircle } from "lucide-react";
 
 interface ScenarioCardProps {
   scenario: Scenario;
@@ -10,8 +10,6 @@ interface ScenarioCardProps {
 }
 
 export function ScenarioCard({ scenario, isSelected, onClick }: ScenarioCardProps) {
-  const IconComponent = (LucideIcons as Record<string, React.ComponentType<{ className?: string }>>)[scenario.icon] || LucideIcons.HelpCircle;
-  
   return (
     <Card
       className={cn(
@@ -27,11 +25,11 @@ export function ScenarioCard({ scenario, isSelected, onClick }: ScenarioCardProp
             "flex-shrink-0 w-10 h-10 rounded-md flex items-center justify-center",
             isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
           )}>
-            <IconComponent className="w-5 h-5" />
+            <HelpCircle className="w-5 h-5" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-medium text-sm truncate">{scenario.name}</h3>
-            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+            <h3 className="font-medium text-sm">{scenario.name}</h3>
+            <p className="text-xs text-muted-foreground mt-1">
               {scenario.description}
             </p>
           </div>

@@ -6,6 +6,19 @@ This is an AI-powered therapeutic chatbot application implementing Meta-Personal
 
 The system guides users through evidence-based therapeutic protocols including work with burnout, anxiety management, relationship difficulties, and self-identity crises. It follows strict MPT methodology principles focused on identifying deep needs, working with bodily sensations and emotions, and developing constructive strategies.
 
+## Recent Changes (December 06, 2025)
+
+**Project Import Completed**: Successfully imported GitHub repository and configured for Replit environment
+- Installed all npm dependencies (100+ packages including React, Express, Tailwind, Radix UI)
+- Created missing `shared/schema.ts` file with 15 therapeutic scenarios and type definitions
+- Verified Vite configuration for Replit proxy compatibility (allowedHosts: true)
+- Set up development workflow "Start application" running on port 5000
+- Configured CEREBRAS_API_KEY environment secret
+- Successfully tested application - Russian language UI loads correctly
+- Configured deployment settings for production (autoscale, npm build/start)
+
+**Status**: Application is fully functional and ready to use in both development and production modes.
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -55,7 +68,15 @@ Preferred communication style: Simple, everyday language.
 
 **Therapeutic Logic**: 
 - Comprehensive MPT system prompt embedding therapeutic methodology
-- Scenario-based conversation flows with 4 predefined therapeutic scenarios
+- Scenario-based conversation flows with 15 predefined therapeutic scenarios including:
+  - Burnout and emotional exhaustion
+  - Anxiety and panic attacks
+  - Loneliness and social isolation
+  - Relationship difficulties
+  - Loss and grief
+  - Trauma recovery
+  - Self-esteem and identity crises
+  - And more specialized scenarios
 - Phase tracking through therapeutic process (initial → goals → needs → energy → metaposition → integration → actions → closing)
 - Circular questioning techniques to identify deep needs
 
@@ -102,11 +123,20 @@ Preferred communication style: Simple, everyday language.
 ### Build and Development
 
 **Development Server**: Vite dev server with HMR (Hot Module Replacement) via WebSocket at `/vite-hmr`
+- Command: `npm run dev` 
+- Runs on port 5000 bound to 0.0.0.0 for Replit compatibility
+- TypeScript execution via tsx for hot reloading
 
 **Production Build**: 
 - Client: Vite builds to `dist/public`
 - Server: esbuild bundles TypeScript to `dist/index.cjs` with selective dependency bundling
 - Build script uses allowlist approach for critical dependencies to reduce cold start times
+- Command: `npm run build`
+
+**Production Deployment**:
+- Command: `npm start` (runs NODE_ENV=production node dist/index.cjs)
+- Deployment target: Autoscale (stateless web application)
+- Serves static files from dist/public and handles API requests
 
 **Development Tools**:
 - Replit-specific plugins for cartographer and dev banner (environment-conditional)
